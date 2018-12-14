@@ -1,18 +1,11 @@
-#récupération d'un data frame avec une seule fois chaque participant par jeux
+#r?cup?ration d'un data frame avec une seule fois chaque participant par jeux
+athlete_events = read.csv(file="./athlete_events.csv", header=TRUE, sep=",")
 
-dataUnique=unique.data.frame(cbind.data.frame(athlete_events$ID,Year=athlete_events$Year, athlete_events$Sex))
+dataUnique=unique.data.frame(cbind.data.frame(ID=athlete_events$ID,Year=athlete_events$Year, Sex=athlete_events$Sex))
 
-dataUniqueOrdonne=dataUnique[order(dataUnique$Year),]
+#dataUniqueOrdonne=dataUnique[order(dataUnique$Year),]
 
-ddply(dataUniqueOrdonne,c(athlete_events$Sex,dataUniqueOrdonne$Year),summarize,nb_femme=sum(Sex=='F'),nb_homme=sum(Sex=='M'))
+plot1 = ddply(dataUnique, .(Sex, Year), summarize, Nb=sum(Sex==Sex))
 
-ggplot(dataUniqueOrdonne)
-#retrouver  le nombre de femmes et d'hommes par an -> ne marche pas
-test2=dataUniqueOrdonne %>% group_by(dataUniqueOrdonne$Year) %>% 
-summarize(nbHommes=sum(dataUniqueOrdonne$`athlete_events$Sex`=='M'),
-          nbFemmes=sum(dataUniqueOrdonne$`athlete_events$Sex`=='F'))
-
-#retrouver le nombre de femmes et d'hommes au JO par an -> marche
-test3= dataUniqueOrdonne %>% group_by(dataUniqueOrdonne$Year,Gender=dataUniqueOrdonne$`athlete_events$Sex`) %>% summarize(gender_count=n())
-ggplot(test3,aes(x=test3$`dataUniqueOrdonne$Year`,y=test3$gender_count,fill=test3$Gender))+geom_bar(stat="identity",position="dodge")
-
+ggplot(data=plot1, aes(x=Year, y=Nb, fill=Sex)) +
+  geom_bar(stat="identity", position=position_dodge())
