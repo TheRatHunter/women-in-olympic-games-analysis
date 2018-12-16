@@ -14,14 +14,15 @@ plot1 = ddply(year_sex_unique, .(Sex, Year), summarize, Nb=sum(Sex==Sex))
 ggplot(data=plot1, aes(x=Year, y=Nb, fill=Sex)) +
   geom_bar(stat="identity", position=position_dodge())
 
-### Medailles feminines par habitant en 2008, comparees avec l'IDSH des pays 
+### 2 - Medailles feminines par habitant en 2008, comparees avec l'IDSH des pays 
 
 idsh = read.csv(file="./idsh.csv", header=TRUE, sep=",")
 
-# Medailles feminines avec pays en 2008
+# Medailles feminines avec pays en 2006 et 2008
 medals_per_year_f = ddply(athlete_events, .(NOC, Year), summarize, Medals=sum(!is.na(Medal) & (Sex=="F")))
 medals_per_year_f_2006_2008 = medals_per_year_f[medals_per_year_f$Year==2006 | medals_per_year_f$Year==2008,]
 
+# Medailles par habitants et isdh pour les 40 pays selectionnes et pour les 2 annees selectionnees
 temp = merge(idsh, medals_per_year_f_2006_2008, by.x="NOC", by.y="NOC")
 plot2 = ddply(temp, .(NOC, idsh2006, Year), summarize, ratio_medals_per_habitants=(Medals/habitants2006))
 plot2$Year = factor(plot2$Year)
