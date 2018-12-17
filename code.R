@@ -1,6 +1,7 @@
 #Pas universel, modification selon path et version
 library("ggplot2", lib.loc="~/R/x86_64-pc-linux-gnu-library/3.4")
 library("plyr", lib.loc="~/R/x86_64-pc-linux-gnu-library/3.4")
+library("cowplot", lib.loc="~/R/x86_64-pc-linux-gnu-library/3.4")
 
 ### 1 - Nb d'hommes et de femmes dans les JO par an selon path
 
@@ -72,70 +73,38 @@ plot4 = ddply(athlete_events, .(Sex, Year,Sport,Weight), summarize, ID=unique(ID
 # Ne pas prendre en compte les NA
 plot4=na.omit(plot4)
 # Isoler la gymnastique, apres 1936
-plot4gym=plot4[plot4$Sport=="Gymnastics"& plot4$Year>=1936,] 
+plot4gym=plot4[plot4$Sport=="Gymnastics"& plot4$Year>=1930,] 
 # Calculer moyenne des poids par sexe et annee
 plot4gym=ddply(plot4gym,.(Sex,Year),summarize, weight_mean=mean(Weight))
 p4_1 = ggplot(plot4gym, aes(x=Year, y=weight_mean, color=Sex))+geom_line()
 
 # Idem pour le basketball
-plot4basketball=plot4[plot4$Sport=="Basketball",] #& plot4bis$Year>=1936,]
+plot4basketball=plot4[plot4$Sport=="Basketball"& plot4$Year>=1970,] #& plot4bis$Year>=1936,]
 plot4basketball=ddply(plot4basketball,.(Sex,Year),summarize, weight_mean=mean(Weight))
 p4_2 = ggplot(plot4basketball, aes(x=Year, y=weight_mean, color=Sex))+geom_line()
 
 # Idem pour le handball -> pas vraiment de recherche de ressembler aux hommes
-plot4handball=plot4[plot4$Sport=="Handball" & plot4$Year>=1976,] 
+plot4handball=plot4[plot4$Sport=="Handball"& plot4$Year>=1970,] 
 plot4handball=ddply(plot4handball,.(Sex,Year),summarize, weight_mean=mean(Weight))
 p4_3 = ggplot(plot4handball, aes(x=Year, y=weight_mean, color=Sex))+geom_line()
 
-# Idem pour la boxe -> tres peu de temps et en plus des categories donc pas parlant
-plot4box=plot4[plot4$Sport=="Boxing" & plot4$Year>=2012,] 
-plot4box=ddply(plot4box,.(Sex,Year),summarize, weight_mean=mean(Weight))
-p4_4 = ggplot(plot4box, aes(x=Year, y=weight_mean, color=Sex))+geom_line()
+# Idem pour le triathlon
+plot4archery=plot4[plot4$Sport=="Archery",] 
+plot4archery=ddply(plot4archery,.(Sex,Year),summarize, weight_mean=mean(Weight))
+p4_4 = ggplot(plot4archery, aes(x=Year, y=weight_mean, color=Sex))+geom_line()
 
 # Idem pour le bobsleigh -> legere augmentation
-plot4bobsleigh=plot4[plot4$Sport=="Bobsleigh" & plot4$Year>=2002,] 
+plot4bobsleigh=plot4[plot4$Sport=="Bobsleigh"& plot4$Year>=2000,] 
 plot4bobsleigh=ddply(plot4bobsleigh,.(Sex,Year),summarize, weight_mean=mean(Weight))
 p4_5 = ggplot(plot4bobsleigh, aes(x=Year, y=weight_mean, color=Sex))+geom_line()
 
 # Idem pour la natation
-plot4swimming=plot4[plot4$Sport=="Swimming" & plot4$Year>=1924,] 
+plot4swimming=plot4[plot4$Sport=="Swimming"& plot4$Year>=1924,] 
 plot4swimming=ddply(plot4swimming,.(Sex,Year),summarize, weight_mean=mean(Weight))
 p4_6 = ggplot(plot4swimming, aes(x=Year, y=weight_mean, color=Sex))+geom_line()
 #ggplot(Nat,aes(x=Year,y=Weight,color=Sex))+geom_point(position = "jitter")
 
-# ### Choix du sport par difference la plus faible et difference la plus elevee avec les hommes sur la moyenne des poids
-# women_only=athlete_events[athlete_events$Sex=='F',]
-# mean_sport=ddply(women_only,.(Sex,Sport),summarize,mean=mean(Weight,na.rm = TRUE))
-# 
-# test=ddply(plot4bis,.(Year,Sex,Sport),summarize, moyenne=mean(Weight))
-# 
-# test1=test[test$Year==2016 | test$Year==2014,]
-# 
-# 
-# test3=test1[test1$Sex=='F',]
-# test3bis=test3[order(test3$Sport),]
-# 
-# test4=test1[test1$Sex=='M',]
-# test4bis=test4[order(test4$Sport),]
-# 
-# test5=0
-# test6=0
-# for (i in 1:46) {
-#   if(test3bis[[3]][i]== test4bis[[3]][i] ){
-#     test6[i]=test3bis[[3]][i]
-#     test5[i]=test4bis[[4]][i]-test3bis[[4]][i]
-#     
-#   }
-# }
-# ##difference moyenne par sport
-# test7=data.frame(diff_moy_weight=test5,sport=test6)
-# test8= test7[which.max(test7$diff_moy_weight),] #Handball poids homme- femme les plus ?loign?s
-# test9 =test7[which.min(test7$diff_moy_weight),] #Boxing poids homme-femme les plus proches
-# 
-# 
-# #### Choix des sports par moyenne la plus lourde, moyenne la plus l?g?re
-# plus_lourde=mean_sport[which.max(mean_sport$mean),] #Gymnastics
-# 
-# plus_legere=mean_sport[which.min(mean_sport$mean),] #Basketball
+plot_grid(p4_1, p4_2, p4_3, p4_4, p4_5, p4_6, labels=c("Gymnastics", "Basket", "Handball", "Archery", "Bobsleigh", "Swimming"), label_size = 12, ncol = 3, nrow = 2)
+
 
 
