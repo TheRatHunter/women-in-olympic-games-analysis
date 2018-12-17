@@ -32,41 +32,42 @@ ggplot(plot2, aes(x=idsh2006, y=ratio_medals_per_habitants, color=Year)) +
   geom_point() +
   scale_color_manual(values=c("#0000ff", "#ff0000"))
 
-###3 - 10 sports avec le moins de femmes aux JO été et aux JO hiver
+### 3 - CLassement des sports selon le ratio hommes femmes
 
-women_only=athlete_events[athlete_events$Sex=='F',]
+# Nb de femmes et hommes par sport et ratio
+gender_by_sports= ddply(athlete_events, .(Sport, Sex), summarize, Nb=sum(Sex==Sex))
 
-#nb de femmes par sport
-women_by_sports= ddply(women_only,.(Sport,Year),summarize,Nb_femme=sum((Sport==Sport)))
+# Pour cibler une annÃ©e :
+# gender_by_sports= ddply(athlete_events[which(athlete_events$Year==2008),], .(Sport, Sex), summarize, Nb=sum(Sex==Sex))
 
-#nb de femmes par sport été et hiver sur les memes annees que l'idsh
-women_by_sports_2006_2008=women_by_sports[women_by_sports$Year==2006 | women_by_sports$Year ==2008,]
+# Calcul du nombre total de participants par sport pour calculer le ratio
+totalPeopleInThisSport = function(mySport){return(sum(gender_by_sports[which(gender_by_sports$Sport==mySport),3]))}
+gender_by_sports$Total = as.integer(lapply(gender_by_sports[,1], totalPeopleInThisSport))
+gender_by_sports$Ratio = (gender_by_sports$Nb/gender_by_sports$Total)*100
 
-#Ordonner les valeurs
-women_by_sports_ordered=women_by_sports_2006_2008[order(women_by_sports_2006_2008$Nb_femme),]
-tentative=head(women_by_sports_ordered,10)
+# Rajout du ratio feminin sur toutes les lignes pour ordonner
+femaleRatio = function(index){
+  if (gender_by_sports[index,2]=="F"){
+    return(gender_by_sports[index, 5])
+  } else {
+    return(100-gender_by_sports[index, 5])
+  }
+}
+gender_by_sports$FemaleRatio = as.double(lapply(1:nrow(gender_by_sports), femaleRatio))
 
-women_by_sports_ordered$Year=factor(women_by_sports_ordered$Year)
+# Ordonner les valeurs selon ratio feminin
+gender_by_sports_ordered=gender_by_sports[order(gender_by_sports$FemaleRatio),]
 
-# affichage -- on voit bien les sports pour les femmes, je n'arrive pas à mettre les hommes aussi
-ggplot(head(women_by_sports_ordered[women_by_sports_ordered$Year==2006 | women_by_sports_ordered$Year==2008,],10),aes(x = Sport,y= Nb_femme, fill=Year))+geom_bar(stat="identity", position="dodge")
+# Definir ordre des labels comme etant celui de FemaleRatio
+gender_by_sports_ordered$Sport <- factor(gender_by_sports_ordered$Sport, levels = unique(gender_by_sports_ordered$Sport[order(gender_by_sports_ordered$FemaleRatio)]))
 
-
-######tentative avec les hommes en +
-bottom_des_sports=ddply(athlete_events,.(Sport,Year,Sex), summarize,Nb=sum(Sex==Sex))
-bottom_charts_2006_2008=bottom_des_sports[bottom_des_sports$Year==2006 | bottom_des_sports$Year==2008,]
-
-bottom_ordered=bottom_charts_2006_2008[order(bottom_charts_2006_2008$Nb),]     
-
-test= bottom_charts_2006_2008[(bottom_charts_2006_2008$Sex=='M'),] # | (bottom_des_sports$Sport==women_by_sports_ordered$Sport),]
-test1=bottom_charts_2006_2008[(bottom_charts_2006_2008$Sport== tentative$Sport[1] | bottom_charts_2006_2008$Sport==tentative$Sport[2] | bottom_charts_2006_2008$Sport==tentative$Sport[3] |
-bottom_charts_2006_2008$Sport== tentative$Sport[4] | bottom_charts_2006_2008$Sport== tentative$Sport[5] | bottom_charts_2006_2008$Sport== tentative$Sport[6] | bottom_charts_2006_2008$Sport== tentative$Sport[7] | bottom_charts_2006_2008$Sport== tentative$Sport[8] | bottom_charts_2006_2008$Sport== tentative$Sport[9] | bottom_charts_2006_2008$Sport== tentative$Sport[10] ),]
-
-ggplot(test1, aes(x=Sport,y=Nb, fill=Sex))+ geom_bar(stat="identity", position="stack")
+ggplot(gender_by_sports_ordered, aes(x=Sport,y=Ratio, fill=Sex)) + 
+  geom_bar(stat="identity", position="stack") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 
 # question 4 pour la gymnastique
-# on récupère une seule fois chaque athlète (ils sont toujours dans la même catégorie de sport)
+# on r?cup?re une seule fois chaque athl?te (ils sont toujours dans la m?me cat?gorie de sport)
 plot4 = ddply(athlete_events, .(Sex, Year,Sport,Weight), summarize, ID=unique(ID) )
 plot4bis=na.omit(plot4)
 
@@ -94,7 +95,7 @@ plot4quath=ddply(plot4terh,.(Sex,Year),summarize, moyh=mean(Weight))
 
 ggplot(plot4quath, aes(x=Year, y=moyh, color=Sex))+geom_line()
 
-#question 4 pour la  très peu de temps et en plus des catégories donc pas parlant
+#question 4 pour la  tr?s peu de temps et en plus des cat?gories donc pas parlant
 plot4terbo=plot4bis[plot4bis$Sport=="Boxing" & plot4bis$Year>=2012,] 
 
 
@@ -120,7 +121,7 @@ Nat2=ddply(Nat,.(Sex,Year),summarize, moynat=mean(Weight))
 ggplot(Nat2, aes(x=Year, y=moynat, color=Sex))+geom_line()
 ggplot(Nat,aes(x=Year,y=Weight,color=Sex))+geom_point(position = "jitter")
 
-### Choix du sport par différence la plus faible et différence la plus élevé avec les hommes sur la moyenne des poids
+### Choix du sport par diff?rence la plus faible et diff?rence la plus ?lev? avec les hommes sur la moyenne des poids
 women_only=athlete_events[athlete_events$Sex=='F',]
 mean_sport=ddply(women_only,.(Sex,Sport),summarize,mean=mean(Weight,na.rm = TRUE))
 
@@ -146,11 +147,11 @@ for (i in 1:46) {
 }
 ##difference moyenne par sport
 test7=data.frame(diff_moy_weight=test5,sport=test6)
-test8= test7[which.max(test7$diff_moy_weight),] #Handball poids homme- femme les plus éloignés
+test8= test7[which.max(test7$diff_moy_weight),] #Handball poids homme- femme les plus ?loign?s
 test9 =test7[which.min(test7$diff_moy_weight),] #Boxing poids homme-femme les plus proches
 
 
-#### Choix des sports par moyenne la plus lourde, moyenne la plus légère
+#### Choix des sports par moyenne la plus lourde, moyenne la plus l?g?re
 plus_lourde=mean_sport[which.max(mean_sport$mean),] #Gymnastics
 
 plus_legere=mean_sport[which.min(mean_sport$mean),] #Basketball
