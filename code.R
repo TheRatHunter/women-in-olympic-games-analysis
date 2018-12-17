@@ -65,95 +65,77 @@ ggplot(gender_by_sports_ordered, aes(x=Sport,y=Ratio, fill=Sex)) +
   geom_bar(stat="identity", position="stack") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
+### 4 - Evolution de la taille et du poids des femmes dans différents sports
 
-# question 4 pour la gymnastique
-# on r?cup?re une seule fois chaque athl?te (ils sont toujours dans la m?me cat?gorie de sport)
+# On recupere une seule fois chaque athlete (ils sont toujours dans la meme categorie de sport)
 plot4 = ddply(athlete_events, .(Sex, Year,Sport,Weight), summarize, ID=unique(ID) )
-plot4bis=na.omit(plot4)
+# Ne pas prendre en compte les NA
+plot4=na.omit(plot4)
+# Isoler la gymnastique, apres 1936
+plot4gym=plot4[plot4$Sport=="Gymnastics"& plot4$Year>=1936,] 
+# Calculer moyenne des poids par sexe et annee
+plot4gym=ddply(plot4gym,.(Sex,Year),summarize, weight_mean=mean(Weight))
+p4_1 = ggplot(plot4gym, aes(x=Year, y=weight_mean, color=Sex))+geom_line()
 
+# Idem pour le basketball
+plot4basketball=plot4[plot4$Sport=="Basketball",] #& plot4bis$Year>=1936,]
+plot4basketball=ddply(plot4basketball,.(Sex,Year),summarize, weight_mean=mean(Weight))
+p4_2 = ggplot(plot4basketball, aes(x=Year, y=weight_mean, color=Sex))+geom_line()
 
-plot4ter=plot4bis[plot4bis$Sport=="Gymnastics"& plot4bis$Year>=1936,] 
+# Idem pour le handball -> pas vraiment de recherche de ressembler aux hommes
+plot4handball=plot4[plot4$Sport=="Handball" & plot4$Year>=1976,] 
+plot4handball=ddply(plot4handball,.(Sex,Year),summarize, weight_mean=mean(Weight))
+p4_3 = ggplot(plot4handball, aes(x=Year, y=weight_mean, color=Sex))+geom_line()
 
+# Idem pour la boxe -> tres peu de temps et en plus des categories donc pas parlant
+plot4box=plot4[plot4$Sport=="Boxing" & plot4$Year>=2012,] 
+plot4box=ddply(plot4box,.(Sex,Year),summarize, weight_mean=mean(Weight))
+p4_4 = ggplot(plot4box, aes(x=Year, y=weight_mean, color=Sex))+geom_line()
 
-plot4quat=ddply(plot4ter,.(Sex,Year),summarize, moy=mean(Weight))
+# Idem pour le bobsleigh -> legere augmentation
+plot4bobsleigh=plot4[plot4$Sport=="Bobsleigh" & plot4$Year>=2002,] 
+plot4bobsleigh=ddply(plot4bobsleigh,.(Sex,Year),summarize, weight_mean=mean(Weight))
+p4_5 = ggplot(plot4bobsleigh, aes(x=Year, y=weight_mean, color=Sex))+geom_line()
 
-ggplot(plot4quat, aes(x=Year, y=moy, color=Sex))+geom_line()
+# Idem pour la natation
+plot4swimming=plot4[plot4$Sport=="Swimming" & plot4$Year>=1924,] 
+plot4swimming=ddply(plot4swimming,.(Sex,Year),summarize, weight_mean=mean(Weight))
+p4_6 = ggplot(plot4swimming, aes(x=Year, y=weight_mean, color=Sex))+geom_line()
+#ggplot(Nat,aes(x=Year,y=Weight,color=Sex))+geom_point(position = "jitter")
 
-# question 4 pour le basketball
-plot4terb=plot4bis[plot4bis$Sport=="Basketball",] #& plot4bis$Year>=1936,] 
-
-
-plot4quatb=ddply(plot4terb,.(Sex,Year),summarize, moyb=mean(Weight))
-
-ggplot(plot4quatb, aes(x=Year, y=moyb, color=Sex))+geom_line()
-
-#question 4 pour le handball pas vraiment de recherche de ressembler aux hommes
-plot4terh=plot4bis[plot4bis$Sport=="Handball" & plot4bis$Year>=1976,] 
-
-
-plot4quath=ddply(plot4terh,.(Sex,Year),summarize, moyh=mean(Weight))
-
-ggplot(plot4quath, aes(x=Year, y=moyh, color=Sex))+geom_line()
-
-#question 4 pour la  tr?s peu de temps et en plus des cat?gories donc pas parlant
-plot4terbo=plot4bis[plot4bis$Sport=="Boxing" & plot4bis$Year>=2012,] 
-
-
-plot4quatbo=ddply(plot4terbo,.(Sex,Year),summarize, moybo=mean(Weight))
-
-ggplot(plot4quatbo, aes(x=Year, y=moybo, color=Sex))+geom_line()
-
-#tentative pour le bobsleigh - legere augmentation
-
-Bob=plot4bis[plot4bis$Sport=="Bobsleigh" & plot4bis$Year>=2002,] 
-
-
-Bob2=ddply(Bob,.(Sex,Year),summarize, moybob=mean(Weight))
-
-ggplot(Bob2, aes(x=Year, y=moybob, color=Sex))+geom_line()
-
-#tentative pour la natation
-
-Nat=plot4bis[plot4bis$Sport=="Swimming" & plot4bis$Year>=1924,] 
-
-Nat2=ddply(Nat,.(Sex,Year),summarize, moynat=mean(Weight))
-
-ggplot(Nat2, aes(x=Year, y=moynat, color=Sex))+geom_line()
-ggplot(Nat,aes(x=Year,y=Weight,color=Sex))+geom_point(position = "jitter")
-
-### Choix du sport par diff?rence la plus faible et diff?rence la plus ?lev? avec les hommes sur la moyenne des poids
-women_only=athlete_events[athlete_events$Sex=='F',]
-mean_sport=ddply(women_only,.(Sex,Sport),summarize,mean=mean(Weight,na.rm = TRUE))
-
-test=ddply(plot4bis,.(Year,Sex,Sport),summarize, moyenne=mean(Weight))
-
-test1=test[test$Year==2016 | test$Year==2014,]
-
-
-test3=test1[test1$Sex=='F',]
-test3bis=test3[order(test3$Sport),]
-
-test4=test1[test1$Sex=='M',]
-test4bis=test4[order(test4$Sport),]
-
-test5=0
-test6=0
-for (i in 1:46) {
-  if(test3bis[[3]][i]== test4bis[[3]][i] ){
-    test6[i]=test3bis[[3]][i]
-    test5[i]=test4bis[[4]][i]-test3bis[[4]][i]
-    
-  }
-}
-##difference moyenne par sport
-test7=data.frame(diff_moy_weight=test5,sport=test6)
-test8= test7[which.max(test7$diff_moy_weight),] #Handball poids homme- femme les plus ?loign?s
-test9 =test7[which.min(test7$diff_moy_weight),] #Boxing poids homme-femme les plus proches
-
-
-#### Choix des sports par moyenne la plus lourde, moyenne la plus l?g?re
-plus_lourde=mean_sport[which.max(mean_sport$mean),] #Gymnastics
-
-plus_legere=mean_sport[which.min(mean_sport$mean),] #Basketball
+# ### Choix du sport par difference la plus faible et difference la plus elevee avec les hommes sur la moyenne des poids
+# women_only=athlete_events[athlete_events$Sex=='F',]
+# mean_sport=ddply(women_only,.(Sex,Sport),summarize,mean=mean(Weight,na.rm = TRUE))
+# 
+# test=ddply(plot4bis,.(Year,Sex,Sport),summarize, moyenne=mean(Weight))
+# 
+# test1=test[test$Year==2016 | test$Year==2014,]
+# 
+# 
+# test3=test1[test1$Sex=='F',]
+# test3bis=test3[order(test3$Sport),]
+# 
+# test4=test1[test1$Sex=='M',]
+# test4bis=test4[order(test4$Sport),]
+# 
+# test5=0
+# test6=0
+# for (i in 1:46) {
+#   if(test3bis[[3]][i]== test4bis[[3]][i] ){
+#     test6[i]=test3bis[[3]][i]
+#     test5[i]=test4bis[[4]][i]-test3bis[[4]][i]
+#     
+#   }
+# }
+# ##difference moyenne par sport
+# test7=data.frame(diff_moy_weight=test5,sport=test6)
+# test8= test7[which.max(test7$diff_moy_weight),] #Handball poids homme- femme les plus ?loign?s
+# test9 =test7[which.min(test7$diff_moy_weight),] #Boxing poids homme-femme les plus proches
+# 
+# 
+# #### Choix des sports par moyenne la plus lourde, moyenne la plus l?g?re
+# plus_lourde=mean_sport[which.max(mean_sport$mean),] #Gymnastics
+# 
+# plus_legere=mean_sport[which.min(mean_sport$mean),] #Basketball
 
 
