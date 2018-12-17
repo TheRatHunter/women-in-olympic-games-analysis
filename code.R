@@ -14,7 +14,8 @@ year_sex_unique = ddply(athlete_events, .(Sex, Year), summarize, ID=unique(ID))
 plot1 = ddply(year_sex_unique, .(Sex, Year), summarize, Nb=sum(Sex==Sex))
 
 ggplot(data=plot1, aes(x=Year, y=Nb, fill=Sex)) +
-  geom_bar(stat="identity", position=position_dodge())
+  geom_bar(stat="identity", position=position_dodge()) +
+  scale_fill_manual(values=c("#228b22", "#E69F00"))
 
 ### 2 - Medailles feminines par habitant en 2008, comparees avec l'IDSH des pays 
 
@@ -26,12 +27,13 @@ medals_per_year_f_2006_2008 = medals_per_year_f[medals_per_year_f$Year==2006 | m
 
 # Medailles par habitants et isdh pour les 40 pays selectionnes et pour les 2 annees selectionnees
 temp = merge(idsh, medals_per_year_f_2006_2008, by.x="NOC", by.y="NOC")
-plot2 = ddply(temp, .(NOC, idsh2006, Year), summarize, ratio_medals_per_habitants=(Medals/habitants2006))
+plot2 = ddply(temp, .(NOC, idsh2006, Year), summarize, ratio_women_medals_per_habitants=(Medals/habitants2006))
 plot2$Year = factor(plot2$Year)
 
-ggplot(plot2, aes(x=idsh2006, y=ratio_medals_per_habitants, color=Year)) +
+ggplot(plot2, aes(x=idsh2006, y=ratio_women_medals_per_habitants, color=Year, shape=Year)) +
   geom_point() +
-  scale_color_manual(values=c("#0000ff", "#ff0000"))
+  scale_shape_manual(values=c(15, 19)) +
+  scale_color_manual(values=c("#228b22", "#E69F00"))
 
 ### 3 - CLassement des sports selon le ratio hommes femmes
 
@@ -64,9 +66,10 @@ gender_by_sports_ordered$Sport <- factor(gender_by_sports_ordered$Sport, levels 
 
 ggplot(gender_by_sports_ordered, aes(x=Sport,y=Ratio, fill=Sex)) + 
   geom_bar(stat="identity", position="stack") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  scale_fill_manual(values=c("#228b22", "#E69F00"))
 
-### 4 - Evolution de la taille et du poids des femmes dans différents sports
+### 4 - Evolution de la taille et du poids des athletes masculins et feminins dans différents sports
 
 # On recupere une seule fois chaque athlete (ils sont toujours dans la meme categorie de sport)
 plot4 = ddply(athlete_events, .(Sex, Year,Sport,Weight), summarize, ID=unique(ID) )
@@ -76,35 +79,61 @@ plot4=na.omit(plot4)
 plot4gym=plot4[plot4$Sport=="Gymnastics"& plot4$Year>=1930,] 
 # Calculer moyenne des poids par sexe et annee
 plot4gym=ddply(plot4gym,.(Sex,Year),summarize, weight_mean=mean(Weight))
-p4_1 = ggplot(plot4gym, aes(x=Year, y=weight_mean, color=Sex))+geom_line()
+p4_1 = ggplot(plot4gym, aes(x=Year, y=weight_mean, color=Sex))+geom_line() +
+  scale_color_manual(values=c("#228b22", "#E69F00"))
 
 # Idem pour le basketball
 plot4basketball=plot4[plot4$Sport=="Basketball"& plot4$Year>=1970,] #& plot4bis$Year>=1936,]
-plot4basketball=ddply(plot4basketball,.(Sex,Year),summarize, weight_mean=mean(Weight))
-p4_2 = ggplot(plot4basketball, aes(x=Year, y=weight_mean, color=Sex))+geom_line()
+plot4basketball=ddply(plot4basketball,.(Sex,Year) ,summarize, weight_mean=mean(Weight))
+p4_2 = ggplot(plot4basketball, aes(x=Year, y=weight_mean, color=Sex))+geom_line() +
+  scale_color_manual(values=c("#228b22", "#E69F00"))
 
 # Idem pour le handball -> pas vraiment de recherche de ressembler aux hommes
 plot4handball=plot4[plot4$Sport=="Handball"& plot4$Year>=1970,] 
 plot4handball=ddply(plot4handball,.(Sex,Year),summarize, weight_mean=mean(Weight))
-p4_3 = ggplot(plot4handball, aes(x=Year, y=weight_mean, color=Sex))+geom_line()
+p4_3 = ggplot(plot4handball, aes(x=Year, y=weight_mean, color=Sex))+geom_line() +
+  scale_color_manual(values=c("#228b22", "#E69F00"))
 
 # Idem pour le triathlon
 plot4archery=plot4[plot4$Sport=="Archery",] 
 plot4archery=ddply(plot4archery,.(Sex,Year),summarize, weight_mean=mean(Weight))
-p4_4 = ggplot(plot4archery, aes(x=Year, y=weight_mean, color=Sex))+geom_line()
+p4_4 = ggplot(plot4archery, aes(x=Year, y=weight_mean, color=Sex))+geom_line() +
+  scale_color_manual(values=c("#228b22", "#E69F00"))
 
 # Idem pour le bobsleigh -> legere augmentation
 plot4bobsleigh=plot4[plot4$Sport=="Bobsleigh"& plot4$Year>=2000,] 
 plot4bobsleigh=ddply(plot4bobsleigh,.(Sex,Year),summarize, weight_mean=mean(Weight))
-p4_5 = ggplot(plot4bobsleigh, aes(x=Year, y=weight_mean, color=Sex))+geom_line()
+p4_5 = ggplot(plot4bobsleigh, aes(x=Year, y=weight_mean, color=Sex))+geom_line() +
+  scale_color_manual(values=c("#228b22", "#E69F00"))
 
 # Idem pour la natation
 plot4swimming=plot4[plot4$Sport=="Swimming"& plot4$Year>=1924,] 
 plot4swimming=ddply(plot4swimming,.(Sex,Year),summarize, weight_mean=mean(Weight))
-p4_6 = ggplot(plot4swimming, aes(x=Year, y=weight_mean, color=Sex))+geom_line()
-#ggplot(Nat,aes(x=Year,y=Weight,color=Sex))+geom_point(position = "jitter")
+p4_6 = ggplot(plot4swimming, aes(x=Year, y=weight_mean, color=Sex))+geom_line() +
+  scale_color_manual(values=c("#228b22", "#E69F00"))
 
-plot_grid(p4_1, p4_2, p4_3, p4_4, p4_5, p4_6, labels=c("Gymnastics", "Basket", "Handball", "Archery", "Bobsleigh", "Swimming"), label_size = 12, ncol = 3, nrow = 2)
+
+plot_grid(p4_1, p4_2, p4_3, p4_4, p4_5, p4_6, 
+          labels=c("Gymnastics", "Basket", "Handball", "Archery", "Bobsleigh", "Swimming"), 
+          label_size = 12, ncol = 3, nrow = 2)
+
+### 5 - Etude de l'age de derniere participation des hommes et des femmes
+
+# On calcule l'age de derniere participation de tous les participants (long donc dans une autre variable pour ne pas relancer a chaque fois)
+plot5preparation = ddply(athlete_events, .(Sex, Year, Age, ID), summarize, LastParticipation=max(Age) )
+# Ne pas prendre en compte les NA
+plot5=na.omit(plot5preparation)
+# Calculer la moyenne de l'age de derniere participation par annee et par sexe
+plot5 = ddply(plot5, .(Sex, Year), summarize, last_participation_age_mean=mean(LastParticipation))
+
+# Avant 1920 il y a trop peu de femmes pour que ce soit représentatif
+plot5 = plot5[which(plot5$Year>1950),]
+
+ggplot(plot5,aes(x=Year,y=last_participation_age_mean,color=Sex)) +
+  scale_shape_manual(values=c(3, 3)) +
+  scale_color_manual(values=c("#228b22", "#E69F00")) +
+  geom_point(position = "jitter", aes(shape=Sex, color=Sex)) +
+  geom_smooth()
 
 
 
