@@ -30,10 +30,11 @@ temp = merge(idsh, medals_per_year_f_2006_2008, by.x="NOC", by.y="NOC")
 plot2 = ddply(temp, .(NOC, idsh2006, Year), summarize, ratio_women_medals_per_habitants=(Medals/habitants2006))
 plot2$Year = factor(plot2$Year)
 
-ggplot(plot2, aes(x=idsh2006, y=ratio_women_medals_per_habitants, color=Year, shape=Year)) +
+ggplot(plot2, aes(x=idsh2006, y=ratio_women_medals_per_habitants, color=Year, shape=Year, size=Year)) +
   geom_point() +
   scale_shape_manual(values=c(15, 19)) +
-  scale_color_manual(values=c("#228b22", "#E69F00"))
+  scale_color_manual(values=c("#228b22", "#E69F00")) +
+  scale_size_manual(values=c(4,4))
 
 ### 3 - CLassement des sports selon le ratio hommes femmes
 
