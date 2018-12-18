@@ -1,4 +1,4 @@
-#Pas universel, modification selon path et version
+# Pas universel, modification selon path et version
 library("ggplot2", lib.loc="~/R/x86_64-pc-linux-gnu-library/3.4")
 library("plyr", lib.loc="~/R/x86_64-pc-linux-gnu-library/3.4")
 library("cowplot", lib.loc="~/R/x86_64-pc-linux-gnu-library/3.4")
@@ -76,7 +76,7 @@ ggplot(gender_by_sports_ordered, aes(x=Sport,y=Ratio, fill=Sex)) +
 plot4 = ddply(athlete_events, .(Sex, Year,Sport,Weight), summarize, ID=unique(ID) )
 # Ne pas prendre en compte les NA
 plot4=na.omit(plot4)
-# Isoler la gymnastique, apres 1936
+# Isoler la gymnastique, apres 1930
 plot4gym=plot4[plot4$Sport=="Gymnastics"& plot4$Year>=1930,] 
 # Calculer moyenne des poids par sexe et annee
 plot4gym=ddply(plot4gym,.(Sex,Year),summarize, weight_mean=mean(Weight))
@@ -89,7 +89,7 @@ plot4basketball=ddply(plot4basketball,.(Sex,Year) ,summarize, weight_mean=mean(W
 p4_2 = ggplot(plot4basketball, aes(x=Year, y=weight_mean, color=Sex))+geom_line() +
   scale_color_manual(values=c("#228b22", "#E69F00"))
 
-# Idem pour le handball -> pas vraiment de recherche de ressembler aux hommes
+# Idem pour le handball
 plot4handball=plot4[plot4$Sport=="Handball"& plot4$Year>=1970,] 
 plot4handball=ddply(plot4handball,.(Sex,Year),summarize, weight_mean=mean(Weight))
 p4_3 = ggplot(plot4handball, aes(x=Year, y=weight_mean, color=Sex))+geom_line() +
@@ -101,7 +101,7 @@ plot4archery=ddply(plot4archery,.(Sex,Year),summarize, weight_mean=mean(Weight))
 p4_4 = ggplot(plot4archery, aes(x=Year, y=weight_mean, color=Sex))+geom_line() +
   scale_color_manual(values=c("#228b22", "#E69F00"))
 
-# Idem pour le bobsleigh -> legere augmentation
+# Idem pour le bobsleigh
 plot4bobsleigh=plot4[plot4$Sport=="Bobsleigh"& plot4$Year>=2000,] 
 plot4bobsleigh=ddply(plot4bobsleigh,.(Sex,Year),summarize, weight_mean=mean(Weight))
 p4_5 = ggplot(plot4bobsleigh, aes(x=Year, y=weight_mean, color=Sex))+geom_line() +
