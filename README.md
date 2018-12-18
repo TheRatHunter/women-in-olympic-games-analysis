@@ -5,3 +5,9 @@ Analyse d'un Dataset issu de l'Open Data avec R afin d'étudier la place de la f
 *INSA Toulouse - 5e année ISS*
 
 *ALOÏSI Axelle & CHASSERAT Laurent*
+
+![Plot1](./plot1.png)
+![Plot2](./plot2.png)
+![Plot3](./plot3.png)
+![Plot4](./plot4.png)
+![Plot5](./plot5.png)
